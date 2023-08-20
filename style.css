@@ -1,0 +1,30 @@
+body {
+    align-items: center;
+    background-color: black;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    font-family: Roboto;
+}
+
+#gameBoard {
+    border: solid white 0.2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.square {
+    align-items: center;
+    border: solid white 0.2rem;
+    cursor: pointer;
+    display: flex;
+    font-size: 76px;
+    font-weight: 800;
+    height: 100px;
+    justify-content: center;
+    width: 100px;
+}
+
+.green {
+    background-color: green;
+}
