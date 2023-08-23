@@ -7,6 +7,10 @@ body {
     font-family: Roboto;
 }
 
+.invisible {
+    visibility: hidden;
+}
+
 #gameBoard {
     border: solid white 0.2rem;
     display: grid;

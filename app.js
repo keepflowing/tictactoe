@@ -4,8 +4,14 @@ let gameOver = false;
 const board = (() => {
     const squares = ["", "", "", "", "", "", "", "", ""];
     const init = () => {
+        if (gameOver) {
+            document.querySelector("#resetBtn").classList.toggle("invisible");
+            gameOver = false;
+        }
+        document.querySelector("#info").innerText = "";
         boardDisplay.innerHTML = "";
         for (let i in squares) {
+            squares[i] = "";
             let square = document.createElement("div");
             square.addEventListener("click", () => {
                 placeMarker(i);
@@ -78,10 +84,8 @@ const board = (() => {
 
     const checkGO = () => {
         let winner;
-        if (checkDraw()) {
-            alert("its a draw")
-        }
-        else if (checkRows()) {
+        let draw = false;
+        if (checkRows()) {
             winner = checkRows();
         }
         else if (checkColumns()) {
@@ -90,9 +94,20 @@ const board = (() => {
         else if (checkDiagonals()) {
             winner = checkDiagonals();
         }
+        else if (checkDraw()) {
+            draw = true;
+        }
         if(winner) {
-            document.querySelector("#info").innerText = `The winner is ${winner.name}`;
             gameOver = true;
+            winner.score += 1;
+            document.querySelector("#info").innerText = `The winner is ${winner.name}`;
+            document.querySelector("#score").innerText = `${players[0].name}: ${players[0].score} - ${players[1].name}: ${players[1].score}`;
+            document.querySelector("#resetBtn").classList.toggle("invisible");
+        }
+        else if(draw) {
+            gameOver = true;
+            document.querySelector("#info").innerText = `It's a draw.`;
+            document.querySelector("#resetBtn").classList.toggle("invisible");
         }
     }
 
