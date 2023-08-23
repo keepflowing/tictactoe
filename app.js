@@ -1,11 +1,14 @@
 const boardDisplay = document.querySelector("#gameBoard");
+const resetBtn = document.querySelector("#resetBtn");
+const info = document.querySelector("#info");
+const score = document.querySelector("#score");
 let gameOver = false;
 
 const board = (() => {
     const squares = ["", "", "", "", "", "", "", "", ""];
     const init = () => {
         if (gameOver) {
-            document.querySelector("#resetBtn").classList.toggle("invisible");
+            resetBtn.classList.toggle("invisible");
             gameOver = false;
         }
         document.querySelector("#info").innerText = "";
@@ -100,14 +103,14 @@ const board = (() => {
         if(winner) {
             gameOver = true;
             winner.score += 1;
-            document.querySelector("#info").innerText = `The winner is ${winner.name}`;
-            document.querySelector("#score").innerText = `${players[0].name}: ${players[0].score} - ${players[1].name}: ${players[1].score}`;
-            document.querySelector("#resetBtn").classList.toggle("invisible");
+            info.innerText = `The winner is ${winner.name}`;
+            score.innerText = `${players[0].name}: ${players[0].score} - ${players[1].name}: ${players[1].score}`;
+            resetBtn.classList.toggle("invisible");
         }
         else if(draw) {
             gameOver = true;
-            document.querySelector("#info").innerText = `It's a draw.`;
-            document.querySelector("#resetBtn").classList.toggle("invisible");
+            info.innerText = `It's a draw.`;
+            resetBtn.classList.toggle("invisible");
         }
     }
 
@@ -124,6 +127,5 @@ const createPlayer = (name, marker) => {
 }
 
 const players = [createPlayer("P1", "X"), createPlayer("P2", "O")]
-
 let playerTurn = players[0];
 board.init();
