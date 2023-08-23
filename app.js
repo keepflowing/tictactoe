@@ -2,6 +2,9 @@ const boardDisplay = document.querySelector("#gameBoard");
 const resetBtn = document.querySelector("#resetBtn");
 const info = document.querySelector("#info");
 const score = document.querySelector("#score");
+
+let ai = 1;
+let playerTurn;
 let gameOver = false;
 
 const board = (() => {
@@ -23,18 +26,28 @@ const board = (() => {
             square.id = "sq"+i;
             boardDisplay.append(square);
         }
+        if (playerTurn === players[1] && ai === 1) {
+            easyAi.play();
+            playerTurn = players[0];
+        }
     }
 
     const placeMarker = (i) => {
         if(!gameOver) {
             if (squares[i] === "") {
                 squares[i] = playerTurn;
-                board.update(i);   
-    
+                update(i);   
+                checkGO();
+
                 playerTurn === players[0] ? playerTurn = players[1]
                 : playerTurn = players[0];
     
-                board.checkGO();
+                if (ai === 1 && playerTurn === players[1] && !gameOver) {
+                    easyAi.play();
+                }
+                else if (ai === 2) {
+
+                }
             }
             else {
                 alert("This square is taken!")
@@ -118,7 +131,18 @@ const board = (() => {
         document.querySelector(`#sq${i}`).innerText = squares[i].marker;
     }
 
-    return {init, update, checkGO, squares}
+    return {init, placeMarker, squares}
+})();
+
+const easyAi = (() => {
+    const play = () => {
+        let i = Math.floor(Math.random() * 9);
+        if (board.squares[i] === "") {
+            board.placeMarker(i);
+        }
+        else {play();}
+    }
+    return {play}
 })();
 
 const createPlayer = (name, marker) => {
@@ -126,6 +150,10 @@ const createPlayer = (name, marker) => {
     return {name, marker, score};
 }
 
-const players = [createPlayer("P1", "X"), createPlayer("P2", "O")]
-let playerTurn = players[0];
-board.init();
+const players = [createPlayer("P1", "X"), createPlayer("P2", "O")];
+
+const startGame = () => {
+    document.querySelector("#start").classList.toggle("invisible");
+    playerTurn = players[0];
+    board.init();
+}
