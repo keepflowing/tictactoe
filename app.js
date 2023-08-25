@@ -14,6 +14,8 @@ const board = (() => {
         if (gameOver) {
             resetBtn.classList.toggle("invisible");
             gameOver = false;
+            let totScore = players[0].score + players[1].score;
+            totScore % 2 === 0 ? playerTurn = players[0] : playerTurn = players[1];
         }
         document.querySelector("#info").innerText = "";
         boardDisplay.innerHTML = "";
@@ -161,16 +163,19 @@ const easyAi = (() => {
 
 const hardAi = (() => {
     const play = () => {
-        if (evaluateState(board.squares) !== -1) {
-            alert("!");
-            board.placeMarker(evaluateState(board.squares));
+        let firstRound = 0;
+        for (let i in board.squares) {
+            if (board.squares[i] === "") {
+                firstRound += 1;
+            }
+        }
+        if (firstRound === 9) {
+            easyAi.play();
         }
         else {
-            let i = Math.floor(Math.random() * 9);
-            if (board.squares[i] === "") {
-                board.placeMarker(i);
+            if (evaluateState(board.squares)[1] !== -1) {
+                board.placeMarker(evaluateState(board.squares)[1]);
             }
-            else {play();}
         }
     }
     return {play}
@@ -189,18 +194,25 @@ const evaluateState = (squares) => {
         hypSquares = Object.create(squares);
         if (squares[i] === "") {
             hypSquares[i] = playerTurn;
-            /* console.log(`
+            /*console.log(`
                 ${hypSquares[0].marker} ${hypSquares[1].marker} ${hypSquares[2].marker}
                 ${hypSquares[3].marker} ${hypSquares[4].marker} ${hypSquares[5].marker} 
                 ${hypSquares[6].marker} ${hypSquares[7].marker} ${hypSquares[8].marker}
-                `); */
+                `); 
+            console.log(bestSquare)*/
             if (board.checkGO(hypSquares) === 1) {
                 bestSquare = i;
+                evaluation = 1;
+                return [evaluation, bestSquare]
+            }
+            else if (board.checkGO(hypSquares) === 0 || board.checkGO(hypSquares) === -1) {
+                bestSquare = i;
+                evaluation = 0;
             }
             else {hypSquares = Object.create(squares)}
         }
     }
-    return bestSquare;
+    return [evaluation, bestSquare];
 }
 
 const players = [createPlayer("P1", "X"), createPlayer("P2", "O")];
