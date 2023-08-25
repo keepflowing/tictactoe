@@ -3,7 +3,8 @@ const resetBtn = document.querySelector("#resetBtn");
 const info = document.querySelector("#info");
 const score = document.querySelector("#score");
 
-let ai = 1;
+let winner;
+let ai = 2;
 let playerTurn;
 let gameOver = false;
 
@@ -30,6 +31,10 @@ const board = (() => {
             easyAi.play();
             playerTurn = players[0];
         }
+        else if (playerTurn === players[1] && ai === 2) {
+            hardAi.play();
+            playerTurn = players[0];
+        }
     }
 
     const placeMarker = (i) => {
@@ -37,7 +42,21 @@ const board = (() => {
             if (squares[i] === "") {
                 squares[i] = playerTurn;
                 update(i);   
-                checkGO();
+                let go = checkGO(squares);
+
+                if (go === 1) {
+                    gameOver = true;
+                    winner.score += 1;
+                    info.innerText = `The winner is ${winner.name}`;
+                    score.innerText = `${players[0].name}: ${players[0].score} - ${players[1].name}: ${players[1].score}`;
+                    resetBtn.classList.toggle("invisible");
+                }
+
+                else if (go === 0) {
+                    gameOver = true;
+                    info.innerText = `It's a draw.`;
+                    resetBtn.classList.toggle("invisible");
+                }
 
                 playerTurn === players[0] ? playerTurn = players[1]
                 : playerTurn = players[0];
@@ -45,8 +64,8 @@ const board = (() => {
                 if (ai === 1 && playerTurn === players[1] && !gameOver) {
                     easyAi.play();
                 }
-                else if (ai === 2) {
-
+                else if (ai === 2 && playerTurn === players[1] && !gameOver) {
+                    hardAi.play();
                 }
             }
             else {
@@ -55,7 +74,7 @@ const board = (() => {
         }
     }
 
-    const checkDraw = () => {
+    const checkDraw = (squares) => {
         let num = 0;
         for (let i in squares) {
             if (squares[i] === "") {
@@ -70,7 +89,7 @@ const board = (() => {
         }
     }
 
-    const checkRows = () => {
+    const checkRows = (squares) => {
         for (i = 0; i < 7; i += 3) {
             if (squares[i] === squares[i+1] && squares[i+1] === squares[i+2] && squares[i] !== "") {
                 return squares[i];
@@ -79,7 +98,7 @@ const board = (() => {
         return false;
     }
 
-    const checkColumns = () => {
+    const checkColumns = (squares) => {
         for (i = 0; i < 3; i++) {
             if (squares[i] === squares[i+3] && squares[i+3] === squares[i+6] && squares[i] !== "") {
                 return squares[i];
@@ -88,7 +107,7 @@ const board = (() => {
         return false;
     }
 
-    const checkDiagonals = () => {
+    const checkDiagonals = (squares) => {
         if (squares[0] === squares[4] && squares[4] === squares[8] && squares[0] !== "") {
             return squares[0];
         }
@@ -98,40 +117,35 @@ const board = (() => {
         return false;
     }
 
-    const checkGO = () => {
-        let winner;
+    const checkGO = (squares) => {
+        winner = false;
         let draw = false;
-        if (checkRows()) {
-            winner = checkRows();
+        if (checkRows(squares)) {
+            winner = checkRows(squares);
         }
-        else if (checkColumns()) {
-            winner = checkColumns();
+        else if (checkColumns(squares)) {
+            winner = checkColumns(squares);
         }
-        else if (checkDiagonals()) {
-            winner = checkDiagonals();
+        else if (checkDiagonals(squares)) {
+            winner = checkDiagonals(squares);
         }
-        else if (checkDraw()) {
+        else if (checkDraw(squares)) {
             draw = true;
         }
         if(winner) {
-            gameOver = true;
-            winner.score += 1;
-            info.innerText = `The winner is ${winner.name}`;
-            score.innerText = `${players[0].name}: ${players[0].score} - ${players[1].name}: ${players[1].score}`;
-            resetBtn.classList.toggle("invisible");
+            return 1;
         }
         else if(draw) {
-            gameOver = true;
-            info.innerText = `It's a draw.`;
-            resetBtn.classList.toggle("invisible");
+            return 0;
         }
+        return -1;
     }
 
     const update = (i) => {
         document.querySelector(`#sq${i}`).innerText = squares[i].marker;
     }
 
-    return {init, placeMarker, squares}
+    return {init, placeMarker, squares, checkGO}
 })();
 
 const easyAi = (() => {
@@ -145,9 +159,48 @@ const easyAi = (() => {
     return {play}
 })();
 
+const hardAi = (() => {
+    const play = () => {
+        if (evaluateState(board.squares) !== -1) {
+            alert("!");
+            board.placeMarker(evaluateState(board.squares));
+        }
+        else {
+            let i = Math.floor(Math.random() * 9);
+            if (board.squares[i] === "") {
+                board.placeMarker(i);
+            }
+            else {play();}
+        }
+    }
+    return {play}
+})();
+
 const createPlayer = (name, marker) => {
     let score = 0;
     return {name, marker, score};
+}
+
+const evaluateState = (squares) => {
+    let evaluation = 0;
+    let bestSquare = -1;
+    let hypSquares;
+    for (let i in squares) {
+        hypSquares = Object.create(squares);
+        if (squares[i] === "") {
+            hypSquares[i] = playerTurn;
+            /* console.log(`
+                ${hypSquares[0].marker} ${hypSquares[1].marker} ${hypSquares[2].marker}
+                ${hypSquares[3].marker} ${hypSquares[4].marker} ${hypSquares[5].marker} 
+                ${hypSquares[6].marker} ${hypSquares[7].marker} ${hypSquares[8].marker}
+                `); */
+            if (board.checkGO(hypSquares) === 1) {
+                bestSquare = i;
+            }
+            else {hypSquares = Object.create(squares)}
+        }
+    }
+    return bestSquare;
 }
 
 const players = [createPlayer("P1", "X"), createPlayer("P2", "O")];
