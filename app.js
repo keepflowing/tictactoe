@@ -7,15 +7,16 @@ let winner;
 let ai = 2;
 let playerTurn;
 let gameOver = false;
+let round = 0;
 
 const board = (() => {
     const squares = ["", "", "", "", "", "", "", "", ""];
     const init = () => {
         if (gameOver) {
+            round += 1;
             resetBtn.classList.toggle("invisible");
             gameOver = false;
-            let totScore = players[0].score + players[1].score;
-            totScore % 2 === 0 ? playerTurn = players[0] : playerTurn = players[1];
+            round % 2 === 0 ? playerTurn = players[0] : playerTurn = players[1];
         }
         document.querySelector("#info").innerText = "";
         boardDisplay.innerHTML = "";
@@ -170,8 +171,10 @@ const hardAi = (() => {
             easyAi.play();
         }
         else {
-            if (evaluateState(board.squares)[1] !== -1) {
-                board.placeMarker(evaluateState(board.squares)[1]);
+            let state = evaluateState(board.squares);
+            //console.log(state[0], state[1])
+            if (state[1] !== -1) {
+                board.placeMarker(state[1]);
             }
             else {easyAi.play()}
         }
@@ -192,12 +195,6 @@ const evaluateState = (squares) => {
         hypSquares = Object.create(squares);
         if (squares[i] === "") {
             hypSquares[i] = playerTurn;
-            /*console.log(`
-                ${hypSquares[0].marker} ${hypSquares[1].marker} ${hypSquares[2].marker}
-                ${hypSquares[3].marker} ${hypSquares[4].marker} ${hypSquares[5].marker} 
-                ${hypSquares[6].marker} ${hypSquares[7].marker} ${hypSquares[8].marker}
-                `); 
-            console.log(bestSquare)*/
             if (board.checkGO(hypSquares) === 1) {
                 bestSquare = i;
                 evaluation = 1;
