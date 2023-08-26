@@ -206,13 +206,34 @@ const evaluateState = (squares) => {
                 return [evaluation, bestSquare]
             }
             else if (board.checkGO(hypSquares) === 0 || board.checkGO(hypSquares) === -1) {
-                bestSquare = i;
+                changePlayerTurn();
                 evaluation = 0;
+                let nextTurn = evaluateState(hypSquares);
+                if (nextTurn[0] === 1) {
+                    bestSquare = nextTurn[1];
+                    changePlayerTurn();
+                    return [evaluation, bestSquare]
+                }
+                else {
+                    bestSquare = Math.floor(Math.random() * 9);
+                    if(board.squares[bestSquare] === "") {
+                        changePlayerTurn();
+                    }
+                    else {
+                        bestSquare = evaluateState(hypSquares)[1];
+                        changePlayerTurn();
+                    }
+                }
             }
             else {hypSquares = Object.create(squares)}
         }
     }
     return [evaluation, bestSquare];
+}
+
+const changePlayerTurn = () => {
+    playerTurn === players[1] ? playerTurn = players[0] 
+    : playerTurn = players[1];
 }
 
 const players = [createPlayer("P1", "X"), createPlayer("P2", "O")];
