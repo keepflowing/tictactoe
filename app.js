@@ -70,9 +70,6 @@ const board = (() => {
                     hardAi.play();
                 }
             }
-            else {
-                alert("This square is taken!")
-            }
         }
     }
 
@@ -176,6 +173,7 @@ const hardAi = (() => {
             if (evaluateState(board.squares)[1] !== -1) {
                 board.placeMarker(evaluateState(board.squares)[1]);
             }
+            else {easyAi.play()}
         }
     }
     return {play}
