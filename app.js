@@ -1,240 +1,149 @@
-const boardDisplay = document.querySelector("#gameBoard");
-const resetBtn = document.querySelector("#resetBtn");
-const info = document.querySelector("#info");
-const score = document.querySelector("#score");
+gameDisplay = document.querySelector("#gameBoard");
 
-let winner;
-let ai = 2;
-let playerTurn;
-let gameOver = false;
-let round = 0;
-
-const board = (() => {
-    const squares = ["", "", "", "", "", "", "", "", ""];
-    const init = () => {
-        if (gameOver) {
-            round += 1;
-            resetBtn.classList.toggle("invisible");
-            gameOver = false;
-            round % 2 === 0 ? playerTurn = players[0] : playerTurn = players[1];
-        }
-        document.querySelector("#info").innerText = "";
-        boardDisplay.innerHTML = "";
-        for (let i in squares) {
-            squares[i] = "";
-            let square = document.createElement("div");
-            square.addEventListener("click", () => {
-                placeMarker(i);
-            });
-            square.classList.add("square");
-            square.id = "sq"+i;
-            boardDisplay.append(square);
-        }
-        if (playerTurn === players[1] && ai === 1) {
-            easyAi.play();
-            playerTurn = players[0];
-        }
-        else if (playerTurn === players[1] && ai === 2) {
-            hardAi.play();
-            playerTurn = players[0];
-        }
+class Player {
+    constructor (name, marker) {
+        this.name = name;
+        this.marker = marker;
     }
+}
 
-    const placeMarker = (i) => {
-        if(!gameOver) {
-            if (squares[i] === "") {
-                squares[i] = playerTurn;
-                update(i);   
-                let go = checkGO(squares);
+const minimax = (squares, player, score) => {
+    let hypSquares = Object.create(squares);
+    const spots = board.emptySquares(hypSquares);
 
-                if (go === 1) {
-                    gameOver = true;
-                    winner.score += 1;
-                    info.innerText = `The winner is ${winner.name}`;
-                    score.innerText = `${players[0].name}: ${players[0].score} - ${players[1].name}: ${players[1].score}`;
-                    resetBtn.classList.toggle("invisible");
-                }
-
-                else if (go === 0) {
-                    gameOver = true;
-                    info.innerText = `It's a draw.`;
-                    resetBtn.classList.toggle("invisible");
-                }
-
-                playerTurn === players[0] ? playerTurn = players[1]
-                : playerTurn = players[0];
+    const moves = [];
     
-                if (ai === 1 && playerTurn === players[1] && !gameOver) {
-                    easyAi.play();
-                }
-                else if (ai === 2 && playerTurn === players[1] && !gameOver) {
-                    hardAi.play();
-                }
+    for (let i = 0; i < spots.length; i++) {
+        hypSquares[spots[i]] = player.marker;
+        console.log(hypSquares[0] + " " + hypSquares[1] + " " + hypSquares[2]);
+        console.log(hypSquares[3] + " " + hypSquares[4] + " " + hypSquares[5]);
+        console.log(hypSquares[6] + " " + hypSquares[7] + " " + hypSquares[8]);
+        console.log("-----------------------");
+        if (board.isGameOver(hypSquares) === 1) {
+            if (player === human) {
+                score = 1;
             }
+            else {score = -1}
+            console.log(score);
+            console.log("-----------------------");
         }
-    }
-
-    const checkDraw = (squares) => {
-        let num = 0;
-        for (let i in squares) {
-            if (squares[i] === "") {
-                num += 1;
-            }
-        }
-        if (num === 0) {
-            return true;
+        else if (board.isGameOver(hypSquares) === 0) {
+            score = 0;
+            console.log(score);
+            console.log("-----------------------");
         }
         else {
-            return false;
+            if (player === human) {
+                minimax(hypSquares, ai)
+            }
+            else {
+                minimax(hypSquares, human)
+            }
+        }
+        hypSquares = Object.create(squares);
+    }
+}
+
+const board = (() => {
+    const squares = [];
+    
+    const init = () => {
+        for (let i = 0; i < 9; i++) {
+            squares[i] = " ";
         }
     }
 
-    const checkRows = (squares) => {
+    const emptySquares = (squares) => {
+        const empty = [];
+        for (let i in squares) {
+            if (squares[i] === " ") {
+                empty.push(i);
+            }
+        }
+        return empty;
+    }
+
+    const draw = () => {
+        console.log(squares[0] + " " + squares[1] + " " + squares[2]);
+        console.log(squares[3] + " " + squares[4] + " " + squares[5]);
+        console.log(squares[6] + " " + squares[7] + " " + squares[8]);
+        console.log("------------------------------")
+    }
+
+    const hasRow = (squares) => {
         for (i = 0; i < 7; i += 3) {
-            if (squares[i] === squares[i+1] && squares[i+1] === squares[i+2] && squares[i] !== "") {
+            if (squares[i] === squares[i+1] && squares[i+1] === squares[i+2] && squares[i] !== " ") {
                 return squares[i];
             }
         }
         return false;
     }
 
-    const checkColumns = (squares) => {
+    const hasColumn = (squares) => {
         for (i = 0; i < 3; i++) {
-            if (squares[i] === squares[i+3] && squares[i+3] === squares[i+6] && squares[i] !== "") {
+            if (squares[i] === squares[i+3] && squares[i+3] === squares[i+6] && squares[i] !== " ") {
                 return squares[i];
             }
         }
         return false;
     }
 
-    const checkDiagonals = (squares) => {
-        if (squares[0] === squares[4] && squares[4] === squares[8] && squares[0] !== "") {
+    const hasDiagonal = (squares) => {
+        if (squares[0] === squares[4] && squares[4] === squares[8] && squares[0] !== " ") {
             return squares[0];
         }
-        else if (squares[2] === squares[4] && squares[4] === squares[6] && squares[2] !== "") {
+        else if (squares[2] === squares[4] && squares[4] === squares[6] && squares[2] !== " ") {
             return squares[2];
         }
         return false;
     }
 
-    const checkGO = (squares) => {
-        winner = false;
-        let draw = false;
-        if (checkRows(squares)) {
-            winner = checkRows(squares);
-        }
-        else if (checkColumns(squares)) {
-            winner = checkColumns(squares);
-        }
-        else if (checkDiagonals(squares)) {
-            winner = checkDiagonals(squares);
-        }
-        else if (checkDraw(squares)) {
-            draw = true;
-        }
-        if(winner) {
+    const isGameOver = (squares) => {
+        if(hasRow(squares)) {
             return 1;
         }
-        else if(draw) {
+        else if (hasColumn(squares)) {
+            return 1;
+        }
+        else if (hasDiagonal(squares)) {
+            return 1;
+        }
+        else if (emptySquares(squares).length === 0) {
             return 0;
         }
+        else {return -1}
+    }
+
+    const placeMarker = (player, i) => {
+        if (squares[i] === " ") {
+            squares[i] = player.marker;
+            return 1;
+        }
         return -1;
-    }
+    } 
 
-    const update = (i) => {
-        document.querySelector(`#sq${i}`).innerText = squares[i].marker;
-    }
-
-    return {init, placeMarker, squares, checkGO}
+    return {init, draw, placeMarker,isGameOver, squares, emptySquares}
 })();
 
-const easyAi = (() => {
-    const play = () => {
-        let i = Math.floor(Math.random() * 9);
-        if (board.squares[i] === "") {
-            board.placeMarker(i);
-        }
-        else {play();}
-    }
-    return {play}
-})();
+let human = new Player("P1", "X");
+let ai = new Player("P2", "O");
 
-const hardAi = (() => {
-    const play = () => {
-        let firstRound = 0;
-        for (let i in board.squares) {
-            if (board.squares[i] === "") {
-                firstRound += 1;
-            }
-        }
-        if (firstRound === 9) {
-            easyAi.play();
-        }
-        else {
-            let state = evaluateState(board.squares);
-            //console.log(state[0], state[1])
-            if (state[1] !== -1) {
-                board.placeMarker(state[1]);
-            }
-            else {easyAi.play()}
+board.init();
+
+for(let i = 0; i < 4; i++) {
+    let empty = [];
+    for(let j = 0; j < 9; j++) {
+        if (board.squares[j] === " ") {
+            empty.push(j)
         }
     }
-    return {play}
-})();
-
-const createPlayer = (name, marker) => {
-    let score = 0;
-    return {name, marker, score};
-}
-
-const evaluateState = (squares) => {
-    let evaluation = 0;
-    let bestSquare = -1;
-    let hypSquares;
-    for (let i in squares) {
-        hypSquares = Object.create(squares);
-        if (squares[i] === "") {
-            hypSquares[i] = playerTurn;
-            if (board.checkGO(hypSquares) === 1) {
-                bestSquare = i;
-                evaluation = 1;
-                return [evaluation, bestSquare]
-            }
-            else if (board.checkGO(hypSquares) === 0 || board.checkGO(hypSquares) === -1) {
-                changePlayerTurn();
-                evaluation = 0;
-                let nextTurn = evaluateState(hypSquares);
-                if (nextTurn[0] === 1) {
-                    bestSquare = nextTurn[1];
-                    changePlayerTurn();
-                    return [evaluation, bestSquare]
-                }
-                else {
-                    bestSquare = Math.floor(Math.random() * 9);
-                    if(board.squares[bestSquare] === "") {
-                        changePlayerTurn();
-                    }
-                    else {
-                        bestSquare = evaluateState(hypSquares)[1];
-                        changePlayerTurn();
-                    }
-                }
-            }
-            else {hypSquares = Object.create(squares)}
-        }
+    let num = Math.floor(Math.random() * empty.length);
+    if (i % 2 === 0) {
+        board.placeMarker(human, empty[num]);
     }
-    return [evaluation, bestSquare];
+    else {
+        board.placeMarker(ai, empty[num]);
+    }
 }
 
-const changePlayerTurn = () => {
-    playerTurn === players[1] ? playerTurn = players[0] 
-    : playerTurn = players[1];
-}
-
-const players = [createPlayer("P1", "X"), createPlayer("P2", "O")];
-
-const startGame = () => {
-    document.querySelector("#start").classList.toggle("invisible");
-    playerTurn = players[0];
-    board.init();
-}
+board.draw();
