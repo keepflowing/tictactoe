@@ -1,4 +1,4 @@
-gameDisplay = document.querySelector("#gameBoard");
+const gameDisplay = document.querySelector("#gameBoard");
 
 class Player {
     constructor (name, marker) {
@@ -7,40 +7,17 @@ class Player {
     }
 }
 
-const minimax = (squares, player, score) => {
-    let hypSquares = Object.create(squares);
-    const spots = board.emptySquares(hypSquares);
+const minimax = (squares, humanPlayer) => {
+    if (board.isGameOver !== -1) {
+        return evaluation;
+    }
 
-    const moves = [];
-    
-    for (let i = 0; i < spots.length; i++) {
-        hypSquares[spots[i]] = player.marker;
-        console.log(hypSquares[0] + " " + hypSquares[1] + " " + hypSquares[2]);
-        console.log(hypSquares[3] + " " + hypSquares[4] + " " + hypSquares[5]);
-        console.log(hypSquares[6] + " " + hypSquares[7] + " " + hypSquares[8]);
-        console.log("-----------------------");
-        if (board.isGameOver(hypSquares) === 1) {
-            if (player === human) {
-                score = 1;
-            }
-            else {score = -1}
-            console.log(score);
-            console.log("-----------------------");
-        }
-        else if (board.isGameOver(hypSquares) === 0) {
-            score = 0;
-            console.log(score);
-            console.log("-----------------------");
-        }
-        else {
-            if (player === human) {
-                minimax(hypSquares, ai)
-            }
-            else {
-                minimax(hypSquares, human)
-            }
-        }
-        hypSquares = Object.create(squares);
+    if (humanPlayer) {
+
+    }
+
+    else {
+
     }
 }
 
