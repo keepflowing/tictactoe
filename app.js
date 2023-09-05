@@ -4,7 +4,6 @@ class Player {
     constructor (name, marker) {
         this.name = name;
         this.marker = marker;
-        this.bestSquare = -1;
     }
 }
 
@@ -16,9 +15,10 @@ const copyArray = (arr) => {
     return newArr;
 }
 
+let moves = [];
+
 const minimax = (boardSquares, humanPlayer) => {
     const squares = copyArray(boardSquares);
-    //board.draw(squares);
     let gameOver = board.isGameOver(squares);
 
     if (gameOver !== false) {
@@ -35,9 +35,6 @@ const minimax = (boardSquares, humanPlayer) => {
                 const hypSquares = copyArray(squares);
                 hypSquares[i] = human.marker;
                 let eval = minimax(hypSquares, false);
-                if (eval > maxEval) {
-                    human.bestSquare = Number(i);
-                }
                 maxEval = Math.max(eval, maxEval)
             }
         }
@@ -51,9 +48,6 @@ const minimax = (boardSquares, humanPlayer) => {
                 const hypSquares = copyArray(squares);
                 hypSquares[i] = ai.marker;
                 let eval = minimax(hypSquares, true);
-                if (eval < minEval) {
-                    aiMod.bestSquare = Number(i);
-                }
                 minEval = Math.min(eval, minEval)
             }
         }
@@ -63,6 +57,7 @@ const minimax = (boardSquares, humanPlayer) => {
 
 const board = (() => {
     const squares = [];
+    let active;
     
     const init = () => {
         for (let i = 0; i < 9; i++) {
@@ -78,13 +73,6 @@ const board = (() => {
             }
         }
         return empty;
-    }
-
-    const draw = (squares) => {
-        console.log(squares[0] + " " + squares[1] + " " + squares[2]);
-        console.log(squares[3] + " " + squares[4] + " " + squares[5]);
-        console.log(squares[6] + " " + squares[7] + " " + squares[8]);
-        console.log("------------------------------")
     }
 
     const hasRow = (squares) => {
@@ -134,42 +122,56 @@ const board = (() => {
     const placeMarker = (player, i) => {
         if (squares[i] === " ") {
             squares[i] = player.marker;
-            return 1;
+            document.querySelector(`#s${i}`).innerHTML = player.marker;
+            player === human ? board.active = ai : board.active = human;
+            if (aiMod.level > 0 && board.active === ai) {
+                aiMod.play();
+            }
+            console.log(isGameOver(squares));
         }
         return -1;
     } 
 
-    return {init, draw, placeMarker, isGameOver, squares}
+    return {init, placeMarker, isGameOver, squares, active}
 })();
 
 const aiMod = (() => {
-    let level = 0;
-    let bestSquare = -1;
-    const setLevel = (x) => {
-        level = x;
-    }
+    let level = 2;
+
     const play = () => {
-        if (level === 2) {
-            minimax(board.squares, false);
-            board.placeMarker(ai, aiMod.bestSquare);
+        let bestEval = 10;
+        let bestMove = -1;
+
+        const empty = [];
+        for (let i in board.squares) {
+            if (board.squares[i] === " ") {
+                empty.push(i);
+            }
+        }
+
+        if (aiMod.level === 2) {
+            const hypSquares = copyArray(board.squares);
+            for (let i in empty) {
+                hypSquares[empty[i]] = ai.marker;
+                let eval = minimax(hypSquares, true);
+                if (eval < bestEval) {
+                    bestMove = empty[i];
+                    bestEval = eval;
+                }
+                hypSquares[empty[i]] = " ";
+            }
+            board.placeMarker(ai, bestMove);
         }
         else {
-            const arr = [];
-            for (let i in board.squares) {
-                if (board.squares[i] === " ") {
-                    arr.push(i);
-                }
-            }
-            let r = Math.floor(Math.random() * arr.length);
-            board.placeMarker(ai, arr[r]);
+            let r = Math.floor(Math.random() * empty.length);
+            board.placeMarker(ai, empty[r]);
         }
     }
-    return {play, setLevel, bestSquare}
+    return {play, level}
 })();
 
 let human = new Player("P1", "X");
 let ai = new Player("P2", "O");
 
+board.active = human;
 board.init();
-
-board.draw(board.squares);
