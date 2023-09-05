@@ -4,20 +4,60 @@ class Player {
     constructor (name, marker) {
         this.name = name;
         this.marker = marker;
+        this.bestSquare = -1;
     }
 }
 
-const minimax = (squares, humanPlayer) => {
-    if (board.isGameOver !== -1) {
-        return evaluation;
+const copyArray = (arr) => {
+    const newArr = [];
+    for (let i in arr) {
+        newArr.push(arr[i]);
+    }
+    return newArr;
+}
+
+const minimax = (boardSquares, humanPlayer) => {
+    const squares = copyArray(boardSquares);
+    //board.draw(squares);
+    let gameOver = board.isGameOver(squares);
+
+    if (gameOver !== false) {
+        if (gameOver === 0) {
+            return 0;
+        }
+        return gameOver === human.marker ?  1 : -1;
     }
 
     if (humanPlayer) {
-
+        let maxEval = -10;
+        for (let i in squares) {
+            if (squares[i] === " "){
+                const hypSquares = copyArray(squares);
+                hypSquares[i] = human.marker;
+                let eval = minimax(hypSquares, false);
+                if (eval > maxEval) {
+                    human.bestSquare = Number(i);
+                }
+                maxEval = Math.max(eval, maxEval)
+            }
+        }
+        return maxEval;
     }
 
     else {
-
+        let minEval = 10; 
+        for (let i in squares) {
+            if (squares[i] === " "){
+                const hypSquares = copyArray(squares);
+                hypSquares[i] = ai.marker;
+                let eval = minimax(hypSquares, true);
+                if (eval < minEval) {
+                    aiMod.bestSquare = Number(i);
+                }
+                minEval = Math.min(eval, minEval)
+            }
+        }
+        return minEval;
     }
 }
 
@@ -40,7 +80,7 @@ const board = (() => {
         return empty;
     }
 
-    const draw = () => {
+    const draw = (squares) => {
         console.log(squares[0] + " " + squares[1] + " " + squares[2]);
         console.log(squares[3] + " " + squares[4] + " " + squares[5]);
         console.log(squares[6] + " " + squares[7] + " " + squares[8]);
@@ -77,18 +117,18 @@ const board = (() => {
 
     const isGameOver = (squares) => {
         if(hasRow(squares)) {
-            return 1;
+            return hasRow(squares);
         }
         else if (hasColumn(squares)) {
-            return 1;
+            return hasColumn(squares);
         }
         else if (hasDiagonal(squares)) {
-            return 1;
+            return hasDiagonal(squares);
         }
         else if (emptySquares(squares).length === 0) {
             return 0;
         }
-        else {return -1}
+        else {return false}
     }
 
     const placeMarker = (player, i) => {
@@ -99,7 +139,32 @@ const board = (() => {
         return -1;
     } 
 
-    return {init, draw, placeMarker,isGameOver, squares, emptySquares}
+    return {init, draw, placeMarker, isGameOver, squares}
+})();
+
+const aiMod = (() => {
+    let level = 0;
+    let bestSquare = -1;
+    const setLevel = (x) => {
+        level = x;
+    }
+    const play = () => {
+        if (level === 2) {
+            minimax(board.squares, false);
+            board.placeMarker(ai, aiMod.bestSquare);
+        }
+        else {
+            const arr = [];
+            for (let i in board.squares) {
+                if (board.squares[i] === " ") {
+                    arr.push(i);
+                }
+            }
+            let r = Math.floor(Math.random() * arr.length);
+            board.placeMarker(ai, arr[r]);
+        }
+    }
+    return {play, setLevel, bestSquare}
 })();
 
 let human = new Player("P1", "X");
@@ -107,20 +172,4 @@ let ai = new Player("P2", "O");
 
 board.init();
 
-for(let i = 0; i < 4; i++) {
-    let empty = [];
-    for(let j = 0; j < 9; j++) {
-        if (board.squares[j] === " ") {
-            empty.push(j)
-        }
-    }
-    let num = Math.floor(Math.random() * empty.length);
-    if (i % 2 === 0) {
-        board.placeMarker(human, empty[num]);
-    }
-    else {
-        board.placeMarker(ai, empty[num]);
-    }
-}
-
-board.draw();
+board.draw(board.squares);
