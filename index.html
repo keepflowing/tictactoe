@@ -8,11 +8,16 @@
     <script src="app.js" defer></script>
 </head>
 <body>
-    <h1></h1>
-    <button class="" id="start" onclick="startGame();">Start Game</button>
-    <div id="gameBoard"></div>
-    <button id="resetBtn" class="invisible" onclick="board.init()">Reset</button>
-    <div id="info"></div>
-    <div id="score"></div>
+    <div id="gameBoard" class="">
+        <div id="s0" class="square" onclick="board.placeMarker(board.active, 0)"></div>
+        <div id="s1" class="square" onclick="board.placeMarker(board.active, 1)"></div>
+        <div id="s2" class="square" onclick="board.placeMarker(board.active, 2)"></div>
+        <div id="s3" class="square" onclick="board.placeMarker(board.active, 3)"></div>
+        <div id="s4" class="square" onclick="board.placeMarker(board.active, 4)"></div>
+        <div id="s5" class="square" onclick="board.placeMarker(board.active, 5)"></div>
+        <div id="s6" class="square" onclick="board.placeMarker(board.active, 6)"></div>
+        <div id="s7" class="square" onclick="board.placeMarker(board.active, 7)"></div>
+        <div id="s8" class="square" onclick="board.placeMarker(board.active, 8)"></div>
+    </div>
 </body>
 </html>
