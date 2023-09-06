@@ -1,9 +1,12 @@
 const gameDisplay = document.querySelector("#gameBoard");
+const resetBtn = document.querySelector("#resetBtn");
+const result = document.querySelector("#result");
 
 class Player {
     constructor (name, marker) {
         this.name = name;
         this.marker = marker;
+        this.score = 0;
     }
 }
 
@@ -60,8 +63,11 @@ const board = (() => {
     let active;
     
     const init = () => {
+        resetBtn.classList.toggle("invisible");
+        result.innerHTML = `${human.name}(${human.marker}): ${human.score} vs. ${ai.name}(${ai.marker}): ${ai.score}`;
         for (let i = 0; i < 9; i++) {
             squares[i] = " ";
+            document.querySelector(`#s${i}`).innerHTML = " ";
         }
     }
 
@@ -124,10 +130,25 @@ const board = (() => {
             squares[i] = player.marker;
             document.querySelector(`#s${i}`).innerHTML = player.marker;
             player === human ? board.active = ai : board.active = human;
-            if (aiMod.level > 0 && board.active === ai) {
+            let go = isGameOver(squares);
+            if (go !== false) {
+                resetBtn.classList.toggle("invisible");
+                if (go === 0) {
+                    result.innerHTML = "It's a draw";
+                }
+                else {
+                    result.innerHTML = `The winner is: ${go}!`;
+                    if (go === human.marker) {
+                        human.score += 1;
+                    }
+                    else {
+                        ai.score += 1;
+                    }
+                } 
+            }
+            else if (aiMod.level > 0 && board.active === ai) {
                 aiMod.play();
             }
-            console.log(isGameOver(squares));
         }
         return -1;
     } 
