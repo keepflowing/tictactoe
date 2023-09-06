@@ -50,8 +50,6 @@ const updateSettings = () => {
     board.init();
 }
 
-let moves = [];
-
 const minimax = (boardSquares, humanPlayer) => {
     const squares = copyArray(boardSquares);
     let gameOver = board.isGameOver(squares);
