@@ -69,6 +69,9 @@ const board = (() => {
             squares[i] = " ";
             document.querySelector(`#s${i}`).innerHTML = " ";
         }
+        if(board.active === ai) {
+            aiMod.play();
+        }
     }
 
     const emptySquares = (squares) => {
