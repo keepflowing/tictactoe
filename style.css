@@ -15,7 +15,7 @@ body {
     border: solid white 0.2rem;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    margin-bottom: 1rem;
+    margin-bottom: 10px;
 }
 
 .square {
@@ -28,6 +28,13 @@ body {
     height: 100px;
     justify-content: center;
     width: 100px;
+}
+
+.space-between {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    width: 250px;
 }
 
 .green {
