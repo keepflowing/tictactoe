@@ -8,7 +8,26 @@
     <script src="app.js" defer></script>
 </head>
 <body>
-    <h1>Tic Tac Toe</h1>
+    <dialog id="options">
+        <form method="dialog">
+            <label for="ai-lev">AI level</label>
+            <select id="ai-lev">
+                  <option value="default">Choose…</option>
+                  <option>2 - Impossible</option>
+                  <option>1 - Easy</option>
+                  <option>0 - Off</option>
+            </select><br>
+            <input type="text" placeholder="P1 Name" id="p1-name">
+            <br>
+            <input type="text" placeholder="P2 Name" id="p2-name">
+            <br>
+          <button onclick="updateSettings();">OK</button>
+        </form>
+    </dialog>
+    <div class="space-between">
+        <h1>Tic Tac Toe</h1>
+        <button id="settings">Settings</button>
+    </div>
     <div id="gameBoard" class="">
         <div id="s0" class="square" onclick="board.placeMarker(board.active, 0)"></div>
         <div id="s1" class="square" onclick="board.placeMarker(board.active, 1)"></div>

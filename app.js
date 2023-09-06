@@ -1,6 +1,15 @@
 const gameDisplay = document.querySelector("#gameBoard");
 const resetBtn = document.querySelector("#resetBtn");
 const result = document.querySelector("#result");
+const settings = document.querySelector("#settings");
+const form = document.querySelector("#options");
+const aiLevel = document.querySelector("#ai-lev");
+const p1Name = document.querySelector("#p1-name");
+const p2Name = document.querySelector("#p2-name");
+
+settings.addEventListener("click", () => {
+   form.show(); 
+});
 
 class Player {
     constructor (name, marker) {
@@ -16,6 +25,29 @@ const copyArray = (arr) => {
         newArr.push(arr[i]);
     }
     return newArr;
+}
+
+const updateSettings = () => {
+    let niv = Number(aiLevel.options[aiLevel.selectedIndex].value[0]);
+    if(niv !== NaN) {
+        aiMod.level = niv;
+    }
+
+    if (p1Name.value !== "") {
+        human.name = p1Name.value; 
+    }
+    if (p2Name.value !== "") {
+        ai.name = p2Name.value;
+    }
+
+    p1Name.value = "";
+    p2Name.value = "";
+
+    human.score = 0;
+    ai.score = 0;
+    board.active = human;
+    resetBtn.classList.remove("invisible");
+    board.init();
 }
 
 let moves = [];
@@ -140,11 +172,12 @@ const board = (() => {
                     result.innerHTML = "It's a draw";
                 }
                 else {
-                    result.innerHTML = `The winner is: ${go}!`;
                     if (go === human.marker) {
+                        result.innerHTML = `The winner is: ${human.name}!`;
                         human.score += 1;
                     }
                     else {
+                        result.innerHTML = `The winner is: ${ai.name}!`
                         ai.score += 1;
                     }
                 } 
