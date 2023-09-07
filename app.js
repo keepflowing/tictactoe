@@ -159,11 +159,12 @@ const board = (() => {
     }
 
     const placeMarker = (player, i) => {
-        if (squares[i] === " ") {
+        let go = isGameOver(squares);
+        if (squares[i] === " " && go === false) {
             squares[i] = player.marker;
             document.querySelector(`#s${i}`).innerHTML = player.marker;
             player === human ? board.active = ai : board.active = human;
-            let go = isGameOver(squares);
+	    go = isGameOver(squares);
             if (go !== false) {
                 resetBtn.classList.toggle("invisible");
                 if (go === 0) {
